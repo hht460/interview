@@ -1,0 +1,667 @@
+﻿第一次：
+1、 >>表示带符号右移； >>>无符号右移， 左边空出的位以0填充 
+	5 >> 2 相当于 5除于2的平方，等于1 ，>>> 表示无符号 右移，高位用0 填充，0001 右移两位 0000
+
+2、
+	实例方法可以对当前对象的实例变量进行操作，也可以对类变量进行操作，但类方法不能访问实例变量。实例方法必须由实例对象来调用，而类方法除了可由实例对象调用外，还可以由类名直接调用。
+	另外，在类方法中不能使用 this 或 super。 关于类方法的使用，有如下一些限制：
+	1 在类方法中不能引用对象变量。
+	2 在类方法中不能使用super、this关键字。
+	3 类方法不能调用类中的对象方法。
+	与类方法相比，实例方法几乎没有什么限制：
+	1 实例方法可以引用对象变量（这是显然的），也可以引用类变量。
+	2 实例方法中可以使用super、this关键字。
+	3 实例方法中可以调用类方法。 
+
+3、
+	（1）：“在Java里面参数传递都是按值传递”这句话的意思是：
+		按值传递是传递的值的拷贝，按引用传递其实传递的是引用的地址值，所以统称按值传递。 
+	（2）：在Java里面只有基本类型和按照下面这种定义方式的String是按值传递，其它的都是按引用传递。
+		就是直接使用双引号定义字符串方式：String str = “Java私塾”;
+
+4、
+	public class Test {
+    static int x=10;
+    static {x+=5;}
+    public static void main(String[] args) //4
+        {
+        System.out.println("x="+x);
+    }
+    static{x/=3;};
+	}//9
+	执行结束： x=5
+		执行这个类的 main方法，会导致类进行加载，而类加载的属性如下
+	 1、虚拟机在首次加载Java类时，会对静态初始化块、静态成员变量、静态方法进行一次初始化。
+		我们不要去纠结这里的顺序，一般来说我们只需要知道，静态方法一般在最后。
+	 2、只有在调用new方法时才会创建类的实例
+	 3、类实例创建过程：按照父子继承关系进行初始化，首先执行父类的初始化块部分，然后是父类的构造方法；
+		再执行本类继承的子类的初始化块，最后是子类的构造方法
+	 4、类实例销毁时候，首先销毁子类部分，再销毁父类部分 
+ 
+ 5、
+	public class NameList
+	{
+    private List names = new ArrayList();
+    public synchronized void add(String name)
+    {
+        names.add(name);
+    }
+    public synchronized void printAll()     {
+        for (int i = 0; i < names.size(); i++)
+        {
+            System.out.print(names.get(i) + ””);
+        }
+    }
+ 
+    public static void main(String[]args)
+    {
+        final NameList sl = new NameList();
+        for (int i = 0; i < 2; i++)
+        {
+            new Thread()
+            {
+                public void run()
+                {
+                    sl.add(“A”);
+                    sl.add(“B”);
+                    sl.add(“C”);
+                    sl.printAll();
+                }
+            } .start();
+        }
+    }
+	}
+		The code may rum with output “A B C A B C A B C “, then exit.
+		The code may ruin with output “A B C A A B C A B C “, then exit.
+	
+	在每个线程中都是顺序执行的，所以sl.printAll();必须在前三句执行之后执行，也就是输出的内容必有ABC。
+	而线程之间是穿插执行的，所以一个线程执行 sl.printAll();之前可能有另一个线程执行了前三句的前几句。
+	E答案相当于线程1顺序执行完然后线程2顺序执行完。
+	G答案则是线程1执行完前三句add之后线程2插一脚执行了一句add然后线程1再执行 sl.printAll();输出ABCA。
+	接着线程2顺序执行完输出ABCABC
+	输出加起来即为ABCAABCABC。
+
+6、	
+	方法的重写（override）两同两小一大原则：
+		方法名相同，参数类型相同
+		子类返回类型小于等于父类方法返回类型，
+		子类抛出异常小于等于父类方法抛出异常，
+		子类访问权限大于等于父类方法访问权限。
+
+7、
+	构造方法是一种特殊的方法，具有以下特点。
+	（1）构造方法的方法名必须与类名相同。
+	（2）构造方法没有返回类型，也不能定义为void，在方法名前面不声明方法类型。
+	（3）构造方法的主要作用是完成对象的初始化工作，它能够把定义对象时的参数传给对象的域。
+	（4）一个类可以定义多个构造方法，如果在定义类时没有定义构造方法，则编译系统会自动插入一个无参数的默认构造器，这个构造器不执行任何代码。
+	（5）构造方法可以重载，以参数的个数，类型，顺序。
+
+8、下面有关forward和redirect的描述：
+		解释一：
+		1.从地址栏显示来说
+			forward是服务器请求资源,服务器直接访问目标地址的URL,把那个URL的响应内容读取过来,然后把这些内容再发给浏览器.浏览器根本不知道服务器发送的内容从哪里来的,所以它的地址栏还是原来的地址.
+			redirect是服务端根据逻辑,发送一个状态码,告诉浏览器重新去请求那个地址.所以地址栏显示的是新的URL.
+		2.从数据共享来说
+			forward:转发页面和转发到的页面可以共享request里面的数据.
+			redirect:不能共享数据.
+		3.从运用地方来说
+			forward:一般用于用户登陆的时候,根据角色转发到相应的模块.
+			redirect:一般用于用户注销登陆时返回主页面和跳转到其它的网站等.
+		4.从效率来说
+			forward:高.
+			redirect:低.
+		
+		解释二：
+		request的forward和response的redirect
+			1.redirect地址栏变化，forward发生在服务器端内部从而导致浏览器不知道响应资源来自哪里
+			2.redirect可以重定向到同一个站点上的其他应用程序中的资源，forward 只能将请求 转发给同一个WEB应用中的组件
+			3.redirect默认是302码，包含两次请求和两次响应
+			4.redirect效率较低
+		
+		解释三：
+		1) redirect 方式 
+			response.sendRedirect("/a.jsp"); 
+			页面的路径是相对路径。sendRedirect可以将页面跳转到任何页面，不一定局限于本web应用中，如： 
+			response.sendRedirect("http://www.ycul.com"); 
+			跳转后浏览器地址栏变化。 
+			这种方式要传值出去的话，只能在url中带parameter或者放在session中，无法使用request.setAttribute来传递。 
+
+		2) forward方式 
+			RequestDispatcher dispatcher = request.getRequestDispatcher("/a.jsp"); 
+			dispatcher .forward(request, response); 
+			页面的路径是相对路径。forward方式只能跳转到本web应用中的页面上。 
+			跳转后浏览器地址栏不会变化。 
+			使用这种方式跳转，传值可以使用三种方法：url中带parameter，session，request.setAttribute 
+
+第二次：
+2017 2/22
+1.以下（）不是合法的标识符？
+[1]Java标识符只能由数字、字母、下划线“_”或“$”符号以及Unicode字符集组成
+[2]Java标识符必须以字母、下划线“_”或“$”符号以及Unicode字符集开头
+[3]Java标识符不可以是Java关键字、保留字（const、goto）和字面量（true、false、null）
+[4]Java标识符区分大小写，是大小写敏感的
+
+2.关于接口和抽象类，错误的是
+
+3.在基本JAVA类型中，如果不明确指定，整数型的默认是什么类型？带小数的默认是什么类型？
+整数类型 默认为 int
+带小数的默认为 double 
+
+4.一个以”.java”为后缀的源文件
+答：只能有一个与文件名相同的类，可以包含其他类
+当编写一个java源代码文件时，此文件通常被称为编译单元（有时也被称为转译单元）。
+每个编译单元都必须有一个后缀名.java，而在编译单元内则可以有一个public类，该类的名称必须与文件的名称相同（包括大小写，但不包括文件的后缀名.java）。
+每个编译单元只能有一个public类，否则编译器就不会接受。
+如果在该编译单元之中还有额外的类的话，那么在包之外的世界是无法看见这些类的，这是因为它们不是public类，而且它们主要用来为主public类提供支持。    
+        --《Java 编程思想》
+注：public类不是必须的，但是如果源文件中有一个（只能有一个）public类的话，文件名必须与这个public类同名，
+原因 是为了方便虚拟机在相应的路径中找到相应的类所对应的字节码文件。所以在没有public类的Java文件中，文件名和类名都没什么联系
+
+5.个线程可同时操作一个数据，为了保证该数据的准确性，可将操作该数据的部分改为？
+答：同步  对该数据加锁，放在同步代码块中
+			synchronize(){
+			} 
+
+	1. 并发：在 操作系统 中，是指一个时间段中有几个程序都处于已启动运行到运行完毕之间，且这几个程序都是在同一个 处理机 上运行。
+		其中两种并发关系分别是同步和互斥
+	2. 互斥：进程间相互排斥的使用临界资源的现象，就叫互斥。
+	3. 同步： 进程之间的关系不是相互排斥临界资源的关系，而是相互依赖的关系。
+		进一步的说明：就是前一个进程的输出作为后一个进程的输入，当第一个进程没有输出时第二个进程必须等待。
+		具有同步关系的一组并发进程相互发送的信息称为消息或事件。
+		其中并发又有伪并发和真并发，伪并发是指单核处理器的并发，真并发是指多核处理器的并发。
+	4. 并行：在单处理器中多道程序设计系统中，进程被交替执行，表现出一种并发的外部特种；
+		在多处理器系统中，进程不仅可以交替执行，而且可以重叠执行。
+		在多处理器上的程序才可实现并行处理。从而可知，并行是针对多处理器而言的。
+		并行是同时发生的多个并发事件，具有并发的含义，但并发不一定并行，也亦是说并发事件之间不一定要同一时刻发生。
+
+	5. 多线程：多线程是程序设计的逻辑层概念，它是进程中并发运行的一段代码。多线程可以实现线程间的切换执行。
+
+	6. 异步：异步和同步是相对的，同步就是顺序执行，执行完一个再执行下一个，需要等待、协调运行。
+		异步就是彼此独立,在等待某事件的过程中继续做自己的事，不需要等待这一事件完成后再工作。
+		线程就是实现异步的一个方式。异步是让调用方法的主线程不需要同步等待另一线程的完成，从而可以让主线程干其它的事情。
+		异步和多线程并不是一个同等关系,异步是最终目的,多线程只是我们实现异步的一种手段。
+		异步是当一个调用请求发送给被调用者,而调用者不用等待其结果的返回而可以做其它的事情。
+		实现异步可以采用多线程技术或则交给另外的进程来处理。
+		
+7.Which statement is true for the class java.util.ArrayList?
+	答：A
+	The elements in the collection are ordered. 
+	The collection is guaranteed to be immutable.
+	The elements in the collection are guaranteed to be unique.
+	The elements in the collection are accessed using a unique key.
+	The elements in the collections are guaranteed to be synchronized.
+	元素在集合中有序，指的是元素插入过程中记录了元素的插入顺序。
+
+8.假设有以下代码String s = "hello"；String t = “hello”；char c [ ] = {'h','e','l','l','o'}；下列选项中返回false的语句是？
+	s.equals (t)；
+	t.equals (c)；(false)
+	s==t；
+	t.equals (new String ("hello"))；
+
+	首先==与equals是有明显区别的。
+	==强调栈中的比较，可以理解为地址比较
+	equals强调对象的内容比较
+	String s=“hello”；会在栈中生成hello字符串，并存入字符串常量池中。
+	String t=“hello” ；创建时，会在字符串常量池中寻找，当找到需要的hello时，不进行字符串的创建，引用已有的。 所以，s==t返回true，s.equals(t)也是true。
+	char c[]={'h','e','l','l','o'}; c==s这个是不存在的，==两边类型不同
+	t.equals(c)这个语句在anObject instanceof String这步判断不会通过，也就是cha[] 压根不能与String相比较，类型不是相同的。返回false
+	
+9.Java中的集合类包括ArrayList、LinkedList、HashMap等类，下列关于集合类描述错误的是
+	ArrayList和LinkedList均实现了List接口
+	ArrayList的访问速度比LinkedList快
+	添加和删除元素时，ArrayList的表现更佳
+	HashMap实现Map接口，它允许任何类型的键和值对象，并允许将null用作键或值
+		A正确，因为ArrayList和LinkedList都实现List接口。
+		B正确，ArrayList底层是数组，所以查询快，增删慢；而LinkedList底层是链表，查询慢，增删快。
+		C错误，见B解析。
+		D正确，描述正确，有一个Hashtable类，是不允许null作键和值的。
+		
+10.关于 JAVA 堆,下面说法错误的是()?
+	所有类的实例和数组都是在堆上分配内存的
+	对象所占的堆内存是由自动内存管理系统回收
+	堆内存由存活和死亡的对象,空闲碎片区组成
+	数组是分配在栈中的
+	
+	Java把内存分成两种，一种叫做栈内存，一种叫做堆内存。
+	在函数中定义的一些基本类型的变量和对象的引用变量都是在函数的栈内存中分配。
+	当在一段代码块中定义一个变量时，java就在栈中为这个变量分配内存空间，当超过变量的作用域后，
+	java会自动释放掉为该变量分配的内存空间，该内存空间可以立刻被另作他用。
+
+	堆内存用于存放由new创建的对象和数组。
+	在堆中分配的内存，由java虚拟机自动垃圾回收器来管理。
+	在堆中产生了一个数组或者对象后，还可以在栈中定义一个特殊的变量，这个变量的取值等于数组或者对象在堆内存中的首地址，
+	在栈中的这个特殊的变量就变成了数组或者对象的引用变量，以后就可以在程序中使用栈内存中的引用变量来访问堆中的数组或者对象，
+	引用变量相当于为数组或者对象起的一个别名，或者代号。
+
+	引用变量是普通变量，定义时在栈中分配内存，引用变量在程序运行到作用域外释放。
+	而数组＆对象本身在堆中分配，即使程序运行到使用new产生数组和对象的语句所在地代码块之外，
+	数组和对象本身占用的堆内存也不会被释放，数组和对象在没有引用变量指向它的时候（比如先前的引用变量x=null时），
+	才变成垃圾，不能再被使用，但是仍然占着内存，在随后的一个不确定的时间被垃圾回收器释放掉。这个也是java比较占内存的主要原因。
+	
+	1. 对象存储在堆区。
+	   对象存储在堆内存，引用变量存储在栈内存。栈内存指向堆内存。 	
+	2. 数组是一种对象。
+
+11.给定以下JAVA代码，这段代码运行后输出的结果是（）?
+public class Test
+{
+    public static int aMethod(int i)throws Exception
+    {
+        try{
+            return i / 10;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("exception in a Method");
+        } finally{
+            System.out.printf("finally");
+        }
+    }
+ 
+    public static void main(String [] args)
+    {
+        try
+        {
+            aMethod(0);
+        }
+        catch (Exception ex)
+        {
+            System.out.printf("exception in main");
+        }
+        System.out.printf("finished");
+    }
+}.
+答：finally finished
+	1、finally块一定会执行，无论是否try…catch。
+	2、finally前有return，会先执行return语句，并保存下来，再执行finally块，最后return。
+	3、finally前有return、finally块中也有return，先执行前面的return，保存下来，再执行finally的return，覆盖之前的结果，并返回
+	
+12.下面有关servlet中init,service,destroy方法描述错误的是？
+	答：D
+	init()方法是servlet生命的起点。一旦加载了某个servlet，服务器将立即调用它的init()方法
+	service()方法处理客户机发出的所有请求
+	destroy()方法标志servlet生命周期的结束
+	servlet在多线程下使用了同步机制，因此，在并发编程下servlet是线程安全的
+
+	servlet在多线程下其本身并不是线程安全的。
+	如果在类中定义成员变量，而在service中根据不同的线程对该成员变量进行更改，那么在并发的时候就会引起错误。
+	最好是在方法中，定义局部变量，而不是类变量或者对象的成员变量。
+	由于方法中的局部变量是在栈中，彼此各自都拥有独立的运行空间而不会互相干扰，因此才做到线程安全。 
+
+13.面代码运行结果是（） ？
+	public class Test{  
+		public int add(int a,int b){    
+			 try { 
+				 return a+b;       
+			 } 
+			catch (Exception e) {   
+				System.out.println("catch语句块"); 
+			 } 
+			 finally{  
+				 System.out.println("finally语句块"); 
+			 } 
+			 return 0; 
+		} 
+		 public static void main(String argv[]){ 
+			 Test test =new Test(); 
+			 System.out.println("和是："+test.add(9, 34)); 
+		 }
+	}
+	finally语句块
+	和是：43
+
+	1.finally{}代码块比return先执行。
+	2.多个return是按顺序执行的的，多个return执行了一个后，后面的return就不会执行了。
+	3. 记住一点，不管有没有异常抛出， finally都会在return返回前执行。
+	
+14.getDeclaredMethods作用？
+	public Method[] getDeclaredMethods()返回类或接口声明的所有方法，
+		包括public, protected, default (package) 访问和private方法的Method对象，但不包括继承的方法。当然也包括它所实现接口的方法。
+	public Method[] getMethods()返回某个类的所有public方法，包括其继承类的公用方法，当然也包括它所实现接口的方法。
+
+15.下列关于JAVA多线程的叙述正确的是（）？
+	答：C
+	调用start()方法和run()都可以启动一个线程
+	CyclicBarrier和CountDownLatch都可以让一组线程等待其他线程
+	Callable类的call()方法可以返回值和抛出异常
+	新建的线程调用start()方法就能立即进行运行状态
+
+	A. start()方法来启动线程，真正实现了多线程运行，调用了run()方法；run()方法当作普通方法的方式调用。
+	B. CyclicBarrier让一组线程等待其他线程；CountDownLatch让一组线程等待某个事件发生。
+	C. Callable能够抛出checked exception。
+	D. start()方法让thread进去可运行状态（runnable），等待获取CPU的使用权。 	
+
+16.
+	1，Java 关键字列表 (依字母排序 共50组)：
+	abstract, assert, boolean, break, byte, case, catch, char, class, const（保留关键字）, 
+	continue, default, do, double, else, enum, extends, final, finally, float, for, goto（保留关键字）, 
+	if, implements, import, instanceof, int, interface, long, native, new, package, private, protected, public, 
+	return, short, static, strictfp, super, switch, synchronized, this, throw, throws, transient, try, void, volatile, while
+	2，保留字列表 (依字母排序 共14组)，Java保留字是指现有Java版本尚未使用，但以后版本可能会作为关键字使用：
+	byValue, cast, false, future, generic, inner, operator, outer, rest, true, var, goto （保留关键字） , const （保留关键字） , null
+
+17.下列描述错误的是?
+		类只能继承一个父类，但是可以实现多个接口
+		抽象类自身可以定义成员而接口不可以
+		抽象类和接口都不能被实例化
+		一个类可以有多个基类和多个基接口
+		
+	A、java为单继承，多实现。可以实现多个接口。
+	B、接口允许定义成员，但必须是常量。static final
+	C、抽象类和接口类的无法实例化，任何编译器中直接使用new会报错。
+	
+第三次
+1、下列Java代码中的变量a、b、c分别在内存的____存储区存放。
+	常量区：未经 new 的常量
+	堆区：	成员变量的引用，new 出来的变量
+	栈区：	局部变量的引用 
+	classA{
+		private String a = “aa”;   // a 为成员变量的引用，   在堆区， “aa”为未经 new 的常量，在常量区
+		public boolean methodB() {
+			String b = “bb”;       // b 为局部变量的引用，  在栈区， “bb”为未经 new 的常量，在常量区
+			final String c = “cc”; // c 为局部变量的引用，  在栈区， “cc”为未经 new 的常量，在常量区
+		}
+	}
+	
+2、子类A继承父类B, A a = new A(); 
+	则父类B构造函数、父类B静态代码块、父类B非静态代码块、子类A构造函数、子类A静态代码块、子类A非静态代码块 执行的先后顺序是？
+答：当实例化子类对象时，首先要加载父类的class文件进内存，静态代码块是随着类的创建而执行，
+	所以父类静态代码块最先被执行，子类class文件再被加载，同理静态代码块被先执行；
+	实例化子类对象要先调用父类的构造方法，而调用父类构造方法前会先执行父类的非静态代码块 
+	
+	会先执行静态代码块，因为静态代码块是类级别的，是在创建对象之前就执行的。
+	因为子类继承了父类，所以父类的静态代码块会先执行，接着执行子类的静态代码块。
+    因为构造函数可能要给动态代码块的一些成员变量赋值，所以必须在这之前先执行动态代码块，
+	要不然构造函数会出现相关的成员属性无定义。
+	所以会先执行动态代码块，在执行构造函数。一般先按父类的执行，再按子类的执行。
+	
+第四次
+1、ConcurrentHashMap使用synchronized关键字保证线程安全
+2、哪个关键字可以对对象加互斥锁？
+	synchronized 关键字 : 用来给对象和方法或者代码块加锁，当它锁定一个方法或者一个代码块的时候，同一时刻最多只有一个线程执行这个段代码。
+	volatile：用来确保将变量的跟新操作通知到其他线程，当把变量声明为volatile类型后，编译器与运行时都会注意到这个变量是共享的，因此不会将该变量上的操作与其他内存操作一起重排序。
+			  然而，在访问volatile变量时不会执行加锁操作，因此也就不会使执行线程阻塞，因此volatile变量是一种比 synchronized关键字更轻量级的同步机制。
+	serialize：Java 对象序列化为二进制文件。
+	static关键字： static关键字可以修饰变量，方法，静态代码块。
+                        静态变量:
+                                          由static修饰的变量称为静态变量
+                                          静态变量属于类，而不属于某个对象
+                                          静态变量它的副本只有一个(静态变量在类中只加载一)
+                        静态方法：
+                                          在静态方法中只能调用静态变量和静态方法
+                                          在非静态方法中，可以调用静态方法或者变量。
+                                          在静态方法中不能使用this和super关键字。
+                        静态代码块
+                                          作用:用来给静态成员变量初始化 
+3、java语言的下面几种数组复制方法中，哪个效率最高？
+	for 循环逐一复制
+	System.arraycoppy
+	ystem.copyof
+	使用clone方法
+	效率：System.arraycopy > clone > System.copyOf > for循环
+	    int[] a1={1,2,3,4,5,6};  
+        int[] a2 = new int[8];  
+        a2[0] = 11;
+        a2[1] = 12;
+        System.arraycopy(a1, 0, a2, 2, 6); 
+		System.out.println(Arrays.toString(a2));
+		[11, 12, 1, 2, 3, 4, 5, 6]
+		public static void arraycopy(Object src,int srcPos,Object dest,int destPos,int length)
+									src - 源数组。
+									srcPos - 源数组中的起始位置。
+									dest - 目标数组。
+									destPos - 目标数据中的起始位置。
+									length - 要复制的数组元素的数量
+
+4、以下哪项陈述是正确的？
+	垃圾回收线程的优先级很高，以保证不再 使用的内存将被及时回收
+	垃圾收集允许程序开发者明确指定释放 哪一个对象
+	垃圾回收机制保证了JAVA程序不会出现 内存溢出
+	进入”Dead”状态的线程将被垃圾回收器回收
+	均不对
+	A: 垃圾回收在jvm中优先级相当相当低。
+	B：垃圾收集器（GC）程序开发者只能推荐JVM进行回收，但何时回收，回收哪些，程序员不能控制。
+	C：垃圾回收机制只是回收不再使用的JVM内存，如果程序有严重BUG，照样内存溢出。
+	D：进入DEAD的线程，它还可以恢复，GC不会回收
+	E: 均不对
+5、下列代码的输出结果是_____
+	boolean b=true?false:true==true?false:true;
+	System.out.println(b);
+	
+	 ==  优先级高于 三目运算符，先判断   true == true，此时返回为  true,
+	这时表达式为   boolean b = true?false:true?false:true
+	此时三目运算符从右向左执行,true?false:true，返回false
+	这时表达式为  boolean b = true?false:false;
+	结果为：boolean b = false ; 
+
+6、下面有关maven和ant的描述，描述错误的是？
+	Ant 没有正式的约定如一个一般项目的目录结构，你必须明确的告诉 Ant 哪里去找源代码
+	Maven 拥有约定，因为你遵循了约定，它已经知道你的源代码在哪里
+	maven和ant都有“生命周期”的概念，当你输入一个命令后，maven或者ant会执行一系列的有序的步骤，直到到达你指定的生命周期
+	Ant构建文件默认命名为build.xml，Maven默认构建文件为pom.xml
+	Ant特点 
+		没有一个约定的目录结构 必须明确让ant做什么，什么时候做，然后编译，打包 没有生命周期，必须定义目标及其实现的任务序列 没有集成依赖管理
+	Maven特点
+		拥有约定，知道你的代码在哪里，放到哪里去 拥有一个生命周期，例如执行 mvn install 就可以自动执行编译，测试，打包等构建过程 
+		只需要定义一个pom.xml,然后把源码放到默认的目录，Maven帮你处理其他事情 拥有依赖管理，仓库管理 
+7、
+	还是需要理解Try...catch...finally与直接throw的区别：try catch是直接处理，处理完成之后程序继续往下执行，
+	throw则是将异常抛给它的上一级处理，程序便不往下执行了。本题的catch语句块里面，打印完1之后，
+	又抛出了一个RuntimeException，程序并没有处理它，而是直接抛出，因此执行完finally语句块之后，程序终止了
+
+8、假设如下代码中，若t1线程在t2线程启动之前已经完成启动。代码的输出是（） ？
+	public static void main(String[]args)throws Exception {
+		final Object obj = new Object();
+		Thread t1 = new Thread() {
+			public void run() {
+				synchronized (obj) {
+					try {
+						obj.wait();
+						System.out.println("Thread 1 wake up.");
+					} catch (InterruptedException e) {
+					}
+				}
+			}
+		};
+		t1.start();
+		Thread.sleep(1000);//We assume thread 1 must start up within 1 sec.
+		Thread t2 = new Thread() {
+			public void run() {
+				synchronized (obj) {
+					obj.notifyAll();
+					System.out.println("Thread 2 sent notify.");
+				}
+			}
+		};
+		t2.start();
+	}
+	
+	Thread 2 sent notify.
+	Thread 1 wake up
+	执行obj.wait();时已释放了锁，所以t2可以再次获得锁，然后发消息通知t1执行，但这时t2还没有释放锁，
+		所以肯定是执行t2，然后释放锁，之后t1才有机会执行。
+	notify()就是对对象锁的唤醒操作。但有一点需要注意的是notify()调用后，并不是马上就释放对象锁的，
+		而是在相应的synchronized(){}语句块执行结束，自动释放锁后，JVM会在wait()对象锁的线程中随机选取一线程，赋予其对象锁，唤醒线程，继续执行。这样就提供了在线程间同步、唤醒的操作。 
+
+第五次
+1、下面代码的输出是什么？
+	public class Base
+	{
+		private String baseName = "base";
+		public Base()
+		{
+			callName();
+		}
+	 
+		public void callName()
+		{
+			System. out. println(baseName);
+		}
+	 
+		static class Sub extends Base
+		{
+			private String baseName = "sub";
+			public void callName()
+			{
+				System. out. println (baseName) ;
+			}
+		}
+		public static void main(String[] args)
+		{
+			Base b = new Sub();
+		}
+	}
+	答：null
+	new Sub();在创造派生类的过程中首先创建基类对象，然后才能创建派生类。
+	创建基类即默认调用Base()构造方法，再方法中调用callName()方法，由于派生类中存在此方法，
+		则被调用的callName（）方法是派生类中的方法，此时派生类还未构造，所以变量baseName的值为null
+		public class Base {
+			private String baseName = "base";
+			public Base() {
+				callName();
+			}
+			public void callName() {
+				System.out.println(baseName);
+			}
+			public static void main(String[] args) {
+				Base b = new Sub();
+			}
+		}
+		
+		class Sub extends Base {
+			private String baseName = "sub";
+			public void callName() {
+				System.out.println(baseName);
+			}
+		}
+	本题与内部类无关系，去掉内部类后代码如上，
+	执行 Base b = new Sub();时由于多态 b编译时表现为Base类特性，运行时表现为Sub类特性，
+	Base b = new Sub()；不管是哪种状态都会调用Base构造器执行 callName()方法；
+	执行方法时，由于多台表现为子类特性，所以会先在子类是否有 callName()；
+	而此时子类尚未初始化（执行完父类构造器后才会开始执行子类），
+	如果有就执行，没有再去父类寻找
+	如果把父类 callName()改为 callName2()，则会输出base
+2、关于HashMap与HashTbale，以下说法错误的是（）？
+	两者都是用key-value方式获取数据
+	Hashtable允许null值作为key和value，而HashMap不可以  (错)
+	HashMap不是同步的，而Hashtable是同步的
+	迭代HashMap采用快速失败机制，而Hashtable不是
+	A：HashMap和Hashtable两个类都实现了Map接口，二者保存K-V对（key-value对）
+	B：HashTable不允许null值(key和value都不可以),HashMap允许null值(key和value都可以)。
+	C：Hashtable的方法是Synchronize的，而HashMap不是，在多个线程访问Hashtable时，不需要自己为它的方法实现同步，而HashMap 就必须为之提供外同步。
+	D：快速失败（Fail-Fast）机制：对于线程不安全的集合对象的迭代器，如果在使用迭代器的过程中有其他线程修改了集合对象结构或者元素数量，
+	   那么将抛出ConcurrentModificationException，这就是所谓fail-fast策略。
+	   迭代 HashMap 采用快速失败机制，而 HashTable 不是，因为 HashTable 是线程安全的。
+	java的快速失败机制，即fail-fast，它是Java集合的一种错误检测机制。当多个线程对集合进行结构上的改变的操作时，有可能会产生fail-fast机制。
+		记住是有可能，而不是一定。
+	例如：假设存在两个线程（线程1、线程2），线程1通过Iterator在遍历集合A中的元素，
+			在某个时候线程2修改了集合A的结构（是结构上面的修改，而不是简单的修改集合元素的内容），
+			那么这个时候程序就会抛出 ConcurrentModificationException 异常，从而产生fail-fast机制。   
+
+3、以下关于final关键字说法错误的是？
+	final是java中的修饰符，可以修饰类、接口、抽象类、方法和属性  (错)
+	final修饰的类肯定不能被继承
+	final修饰的方法不能被重载	(错)
+	final修饰的变量不允许被再次赋值
+
+	final修饰类、方法、属性！不能修饰抽象类，因为抽象类一般都是需要被继承的，final修饰后就不能继承了。
+	final修饰的方法不能被重写而不是重载！ 
+	final修饰属性，此属性就是一个常量，不能被再次赋值！ 
+	
+	final修饰变量，则等同于常量
+	final修饰方法中的参数，称为最终参数。
+	final修饰类，则类不能被继承
+	final修饰方法，则方法不能被重写。
+	   
+第六次
+1、以下哪一个不是赋值符号？
+	+=
+	<<=
+	<<<=         (错误)
+	>>>=
+	
+	<<表示左移位
+	>>表示带符号右移位
+	>>>表示无符号右移
+	但是没有<<<运算符 因为<<后右边总是补0
+	
+2、
+Given:
+	public class IfTest{
+		public static void main(string[]args){
+			int x=3;
+			int y=1;
+			if(x=y)   //报错
+				system.out.println(“Not equal”);
+			else
+				system.out.println(“Equal”);
+		 }
+	}
+What is the result?
+
+The output is “Equal”
+The output in “Not Equal”
+An error at line 5 causes compilation to fall.  (错)
+The program executes but does not print a message.
+
+	C语言中
+	当if语句中的条件为赋值语句时，实际上是将赋值后的结果与0进行比较[左值]
+	if(1)  由于1>0  所以认为是true
+
+	java语言中，虽然也用了左值，但是不再与0比较，而是直接将0放入if()中
+	但是int类型，不能转换为boolean，所以会报错：“ Type mismatch: cannot convert from int to boolean ” 
+
+第七次
+1、下面哪段程序能够正确的实现了GBK编码字节流到UTF-8编码字节流的转换：？
+byte[] src,dst;
+dst=new string (src,”GBK”).getbytes(“UTF-8”)
+
+new String (byte[] bytes, String charsetName) 通过使用指定的 charset 解码指定的 byte 数组，构造一个新的  String
+String.getBytes(Charset charset)  使用给定的 charset 将此 String 编码到 byte 序列，并将结果存储到新的 byte 数组		   
+	   
+第八次
+	1、以下代码的输出结果是？
+	public class B
+	{
+		public static B t1 = new B();
+		public static B t2 = new B();
+		
+		{
+			System.out.println("构造块");
+		}
+		static
+		{
+			System.out.println("静态块");
+		}
+		public static void main(String[] args)
+		{
+			B t = new B();
+		}
+	}
+	静态块 构造块 构造块 构造块
+	构造块 静态块 构造块 构造块
+	构造块 构造块 静态块 构造块  (/)
+	构造块 构造块 构造块 静态块
+	解释：
+	静态块：用static申明，JVM加载类时执行，仅执行一次
+	构造块：类中直接用{}定义，每一次创建对象时执行
+	执行顺序优先级：静态块>main()>构造块>构造方法
+	静态块按照申明顺序执行，所以先执行publicstaticB t1 = newB();该语句创建对象，则又会调用构造块，输出构造块
+	接着执行public static B t1 = new B();输出构造块
+	再执行
+	static
+	{
+		System.out.println("静态块");
+	}
+	输出静态块
+	最后main方法执行，创建对象，输出构造块
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
+	   
