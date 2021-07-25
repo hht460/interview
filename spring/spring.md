@@ -32,12 +32,40 @@ public class ESConfig {
 3、使用
 
 ```
-使用：
+使用，// 如同下面方式1变量注入
 @Autowired
 RestHighLevelClient restHighLevelClient;
-
+或：
 @Autowired
 @Qualifier("restHighLevelClient")
 RestHighLevelClient client;
+```
+
+```
+    /**
+     * 1、变量（filed）注入
+     */
+//    @Autowired
+//    private UserLoginMapper userLoginMapper;
+
+    /**
+     * 2、构造函数注入
+     */
+//    private final UserLoginMapper userLoginMapper;
+//
+//    @Autowired
+//    public UserLoginServiceImpl(UserLoginMapper userLoginMapper) {
+//        this.userLoginMapper = userLoginMapper;
+//    }
+
+    /**
+     * 3、set方式注入
+     */
+    private UserLoginMapper userLoginMapper;
+
+    @Autowired
+    public void setUserLoginMapper(UserLoginMapper userLoginMapper) {
+        this.userLoginMapper = userLoginMapper;
+    }
 ```
 
